@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "302744779095",
+    "firebase_url": "https://roadrash-925ea.firebaseio.com",
+    "project_id": "roadrash-925ea",
+    "storage_bucket": "roadrash-925ea.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302744779095:android:5a798c463c0ea8a82ca612",
+        "android_client_info": {
+          "package_name": "com.example.road_repair"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "302744779095-c6egasgkpetse6q2nf7bpeicvivig2ja.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6oBPPugPDmMnoiVSdlCUb_R_NJZ9H5MQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "302744779095-c6egasgkpetse6q2nf7bpeicvivig2ja.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
