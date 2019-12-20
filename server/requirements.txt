@@ -1,0 +1,6 @@
+tensorflow-gpu
+keras
+imgaug
+opencv-python
+h5py
+flask
