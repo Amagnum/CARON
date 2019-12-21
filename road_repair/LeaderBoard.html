@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Leaderboard Card</title>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-firestore.js"></script>
+</head>
+<body>
+
+    <div id="container"></div>
+
+    <script>
+        var start = (async () => {
+            var firebaseConfig = {
+                apiKey: "AIzaSyBJoegTJBczADKu3pl12LD9t_iyhC87e9M",
+                authDomain: "roadrash-925ea.firebaseapp.com",
+                databaseURL: "https://roadrash-925ea.firebaseio.com",
+                projectId: "roadrash-925ea",
+                storageBucket: "roadrash-925ea.appspot.com",
+                messagingSenderId: "302744779095",
+                appId: "1:302744779095:web:6e7d9dfcc491d59f2ca612",
+                measurementId: "G-V7B9Z4PEZJ"
+            };
+            firebase.initializeApp(firebaseConfig);
+            firebase.analytics();
+            var db = firebase.firestore();
+            var container = document.getElementById("container")
+            await db.collection("UserData").orderBy("points", "desc").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    let data = doc.data()
+                    var div = document.createElement("div");
+                    div.classList.add('container')
+                    div.innerHTML = `
+                        <div class="img">
+                            <img src="https://cdn.pixabay.com/photo/2016/11/18/23/38/child-1837375_1280.png">
+                        </div>
+                        <div class="data">
+                            <div style="font-size:large;padding-top:5px"><strong>${data.username}</strong></div>
+                            <small>${data.email}</small> <br />
+                            ${data.points} KPs
+                        </div>
+                    `
+
+                    container.appendChild(div);
+                })
+            }).catch(err => {
+                console.log(err)
+            });
+        })();
+    </script>
+
+    <style>
+        .container {
+            width: 90%;
+            height: 100px;
+            margin: auto;
+            padding: 15px;
+            text-align: center;
+        }
+        .img {
+            position: relative;
+            top: 5px;
+            width: 90px;
+            height: 90px;
+            float: left;
+            left: 3px;
+        }
+        .data {
+            height: 100px;
+            background: black;
+            color: #cccccc;
+            line-height: 1.6;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 50%;
+        }
+    </style>
+</body>
+</html>
