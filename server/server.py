@@ -39,7 +39,8 @@ def predict():
 
     cv2.imwrite("detected.jpg", image)
     return jsonify(
-        NUM_POTHOLES=len(boxes)
+        NUM_POTHOLES=len(boxes),
+        coordinates=boxes
     )
 
 if __name__ == '__main__':

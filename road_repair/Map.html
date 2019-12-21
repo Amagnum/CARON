@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Map</title>
+    <style>
+        #map {
+            height: 100%;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-firestore.js"></script>
+      
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        var map;
+        async function initMap() {
+
+            var latitude, longitude
+
+            await navigator.geolocation.getCurrentPosition(async position => {
+                latitude = position.coords.latitude;
+                longitude = position.coords.longitude;
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: latitude, lng: longitude},
+                    zoom: 18
+                });
+                var firebaseConfig = {
+                    apiKey: "AIzaSyBJoegTJBczADKu3pl12LD9t_iyhC87e9M",
+                    authDomain: "roadrash-925ea.firebaseapp.com",
+                    databaseURL: "https://roadrash-925ea.firebaseio.com",
+                    projectId: "roadrash-925ea",
+                    storageBucket: "roadrash-925ea.appspot.com",
+                    messagingSenderId: "302744779095",
+                    appId: "1:302744779095:web:6e7d9dfcc491d59f2ca612",
+                    measurementId: "G-V7B9Z4PEZJ"
+                };
+                firebase.initializeApp(firebaseConfig);
+                firebase.analytics();
+                var db = firebase.firestore();
+    
+                var docData = {
+                        arr: [
+                            { lat: latitude, lng: longitude, isCompleted: true },
+                            { lat: 29.870234, lng: 77.892705, isCompleted: false },
+                            { lat: 29.870131, lng: 77.892725, isCompleted: true },
+                            { lat: 29.870124, lng: 77.892745, isCompleted: false },
+                            { lat: 29.870128, lng: 77.892775, isCompleted: true },
+                            { lat: 29.870119, lng: 77.892715, isCompleted: true },
+                        ]
+                };
+
+                await db.collection("routes").doc("one").set(docData)
+
+                await db.collection("routes").get().then(querySnapshot => {
+                    querySnapshot.forEach(doc => {
+                        let data = doc.data().arr
+                        data.forEach(async (d, i) => {
+                            if(i === data.length - 1) return;
+                            let path = [
+                                {lat: d.lat, lng: d.lng}, 
+                                {lat: data[i+1].lat, lng: data[i+1].lng}
+                            ]
+                            let strokeColor = data[i+1].isCompleted ? '#00FF00' : '#FF0000'
+                            console.log(path, strokeColor)
+                            var flightPath = new google.maps.Polyline({
+                                path,
+                                geodesic: true,
+                                strokeColor,
+                                strokeWeight: 5,
+                            });
+                            flightPath.setMap(map);
+                        })
+                    })
+
+                })
+
+                // var flightPlanCoordinates = [
+                //     { lat: latitude, lng: longitude },
+                //     { lat: 29.870234, lng: 77.892705 },
+                //     { lat: 29.870131, lng: 77.892725 },
+                //     { lat: 29.870124, lng: 77.892745 },
+                //     { lat: 29.870128, lng: 77.892775 },
+                //     { lat: 29.870119, lng: 77.892715 },
+                // ];
+    
+                // var flightPath = new google.maps.Polyline({
+                //     path: flightPlanCoordinates,
+                //     geodesic: true,
+                //     strokeColor: '#FF0000',
+                //     strokeWeight: 5,
+                // });
+    
+                // flightPath.setMap(map);
+            })
+
+
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCI-cR5myD0t1dOKh81RXlhGP1zct4ICMU&callback=initMap" async defer></script>
+</body>
+</html>
