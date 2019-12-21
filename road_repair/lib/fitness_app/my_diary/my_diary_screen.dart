@@ -80,7 +80,7 @@ class _MyDiaryScreenState extends State<MyDiaryScreen>
               context,
               MaterialPageRoute(
                 builder: (BuildContext context) => WebviewScaffold(
-                  url: "https://map-road-rash.netlify.com/?type=one",
+                  url: "https://leaderboard-road-rash.netlify.com",
                   appBar: new AppBar(
                     title: new Text("Leader Board"),
                   ),
@@ -127,18 +127,6 @@ class _MyDiaryScreenState extends State<MyDiaryScreen>
                   curve: Interval((1 / count) * 8, 1.0,
                       curve: Curves.fastOutSlowIn))),
           animationController: widget.animationController),
-    );
-
-    listViews.add(
-      TitleView(
-        titleTxt: 'Water',
-        subTxt: 'Aqua SmartBottle',
-        animation: Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
-            parent: widget.animationController,
-            curve:
-                Interval((1 / count) * 6, 1.0, curve: Curves.fastOutSlowIn))),
-        animationController: widget.animationController,
-      ),
     );
 
     listViews.add(SizedBox(
@@ -252,7 +240,7 @@ class _MyDiaryScreenState extends State<MyDiaryScreen>
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  'My Diary',
+                                  'C.A.R.O.N.',
                                   textAlign: TextAlign.left,
                                   style: TextStyle(
                                     fontFamily: FintnessAppTheme.fontName,

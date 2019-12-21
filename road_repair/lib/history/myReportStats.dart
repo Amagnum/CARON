@@ -255,7 +255,7 @@ class DetailPage extends StatelessWidget {
                 ])),
             Container(
               child: Image.network(
-                "https://maps.googleapis.com/maps/api/staticmap?center=&zoom=13&scale=1&size=200x200&maptype=roadmap&key=AIzaSyCI-cR5myD0t1dOKh81RXlhGP1zct4ICMU&format=jpg&visual_refresh=true&markers=size:tiny%7Ccolor:0xff0000%7Clabel:1%7C${docdata["location"] == null ? 29.863061 : docdata["location"][0]},${docdata["location"] == null ? 77.909338 : docdata["location"][1]}",
+                "https://maps.googleapis.com/maps/api/staticmap?center=&zoom=13&scale=1&size=300x300&maptype=roadmap&key=AIzaSyCI-cR5myD0t1dOKh81RXlhGP1zct4ICMU&format=jpg&visual_refresh=true&markers=size:tiny%7Ccolor:0xff0000%7Clabel:1%7C${docdata["location"] == null ? 29.863061 : docdata["location"]['geopoint'].latitude},${docdata["location"] == null ? 77.909338 : docdata["location"]['geopoint'].longitude}",
                 fit: BoxFit.contain,
               ),
               width: MediaQuery.of(context).size.width,

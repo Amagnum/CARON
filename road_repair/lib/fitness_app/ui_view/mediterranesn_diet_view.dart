@@ -37,6 +37,43 @@ class MediterranesnDietView extends StatelessWidget {
     return points;
   }
 
+   Future<Map> getAll() async {
+    var userd = await FirebaseAuth.instance.currentUser();
+    var all = 0;
+    var rejected = 0;
+    var ongoing = 0;
+    var completed = 0;
+    await Firestore.instance
+        .collection("Reports")
+        .where("userId", isEqualTo: userd.uid)
+        .getDocuments()
+        .then((data) {
+      data.documents.forEach((doc) {
+        all++;
+        if (doc['status'] == "ongoing") {
+          ongoing++;
+        }
+        if (doc['status'] == "rejected") {
+          rejected++;
+        }
+        if (doc['status'] == "completed") {
+          completed++;
+        }
+      });
+    });
+    int kp = await getP();
+
+    var user = {
+      "all": all,
+      'kp': kp,
+      "rejec": rejected,
+      "ongoing": ongoing,
+      "completed": completed,
+    };
+
+    return user;
+  }
+
   Future<int> getP() async {
     var totalPoints = 0;
     var user = await FirebaseAuth.instance.currentUser();
@@ -85,7 +122,17 @@ class MediterranesnDietView extends StatelessWidget {
                         blurRadius: 10.0),
                   ],
                 ),
-                child: Column(
+                child:  FutureBuilder<Map>(
+                              future: getAll(),
+                              initialData: {
+                                "all": 0,
+                                'kp': 0,
+                                "rejec": 0,
+                                "ongoing": 0,
+                                "completed": 0,
+                              },
+                              builder: (context, snapshot) {
+                                return Column(
                   children: <Widget>[
                     Padding(
                       padding:
@@ -251,7 +298,7 @@ class MediterranesnDietView extends StatelessWidget {
                                                       const EdgeInsets.only(
                                                           left: 4, bottom: 3),
                                                   child: Text(
-                                                    '${(102 * animation.value).toInt()}',
+                                                    '${(snapshot.data['all'] * animation.value).toInt()}',
                                                     textAlign: TextAlign.center,
                                                     style: TextStyle(
                                                       fontFamily:
@@ -297,11 +344,7 @@ class MediterranesnDietView extends StatelessWidget {
                               ),
                             ),
                           ),
-                          FutureBuilder<int>(
-                              future: getP(),
-                              initialData: 0,
-                              builder: (context, snapshot) {
-                                return Padding(
+                         Padding(
                                   padding: const EdgeInsets.only(right: 16),
                                   child: Center(
                                     child: Stack(
@@ -330,7 +373,7 @@ class MediterranesnDietView extends StatelessWidget {
                                                   CrossAxisAlignment.center,
                                               children: <Widget>[
                                                 Text(
-                                                  '${(snapshot.data * animation.value).toInt()}',
+                                                  '${(snapshot.data['kp'] * animation.value).toInt()}',
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     fontFamily: FintnessAppTheme
@@ -383,8 +426,7 @@ class MediterranesnDietView extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                );
-                              })
+                                )
                         ],
                       ),
                     ),
@@ -453,7 +495,7 @@ class MediterranesnDietView extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 6),
                                   child: Text(
-                                    '12', // TODO
+                                    snapshot.data['ongoing'].toString(), // TODO
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontFamily: FintnessAppTheme.fontName,
@@ -522,7 +564,7 @@ class MediterranesnDietView extends StatelessWidget {
                                     Padding(
                                       padding: const EdgeInsets.only(top: 6),
                                       child: Text(
-                                        '30', // TODO
+                                        snapshot.data['rejec'].toString(), // TODO
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontFamily: FintnessAppTheme.fontName,
@@ -593,7 +635,7 @@ class MediterranesnDietView extends StatelessWidget {
                                     Padding(
                                       padding: const EdgeInsets.only(top: 6),
                                       child: Text(
-                                        '10 reports', // TODO
+                                        snapshot.data['completed'].toString()+' reports', // TODO
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           fontFamily: FintnessAppTheme.fontName,
@@ -613,7 +655,8 @@ class MediterranesnDietView extends StatelessWidget {
                       ),
                     )
                   ],
-                ),
+                );
+                              })
               ),
             ),
           ),

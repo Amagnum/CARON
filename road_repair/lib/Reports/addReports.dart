@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -101,6 +102,9 @@ class _FeedPageState extends State<FeedPage> {
   }
 
   void okTested() async {
+    FirebaseMessaging message = FirebaseMessaging();
+    String token = await message.getToken();
+
     loadLocation();
     if (images.length == 0) {
       Fluttertoast.showToast(msg: 'Please add one image!');
@@ -116,6 +120,7 @@ class _FeedPageState extends State<FeedPage> {
         'images': images,
         'rating': sliderValue,
         'status': 'submitted',
+        'token': token,
         'category': 'Pot Holes',
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'location': upPoint.data,

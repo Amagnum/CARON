@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:road_repair/fitness_app/fintness_app_theme.dart';
 
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -97,34 +96,9 @@ class FireMapState extends State<FireMap> {
     documentList.forEach((DocumentSnapshot document) {
       GeoPoint pos = document.data['location']['geopoint'];
       double distance = document.data['distance'];
-
-      print(documentList.length);
-      BitmapDescriptor icon;
-      switch (document.data['rating']) {
-        case 5:
-          icon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
-          break;
-        case 4:
-          icon =
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange);
-          break;
-        case 3:
-          icon =
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
-          break;
-        case 2:
-          icon =
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue);
-          break;
-        case 1:
-          icon =
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
-          break;
-        default:
-      }
       var marker = MarkerOptions(
           position: LatLng(pos.latitude, pos.longitude),
-          icon: icon,
+          icon: BitmapDescriptor.defaultMarker,
           infoWindowText: InfoWindowText(
               'Magic Marker', '$distance kilometers from query center'));
 
