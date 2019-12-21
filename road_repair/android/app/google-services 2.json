@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "983039729326",
+    "firebase_url": "https://multi-hotel-app.firebaseio.com",
+    "project_id": "multi-hotel-app",
+    "storage_bucket": "multi-hotel-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983039729326:android:0d2bb2ae91963a01bf573f",
+        "android_client_info": {
+          "package_name": "com.thesmallcreators.hotels"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "983039729326-30q8v4svilfrhsc28r7ts7lqup5af9hf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJ-YCRMqinTqZ5_tiK16dvDbXR-mdOoTs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983039729326-30q8v4svilfrhsc28r7ts7lqup5af9hf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

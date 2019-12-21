@@ -1,0 +1,373 @@
+import 'dart:core';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+final FirebaseAuth _auth = FirebaseAuth.instance;
+
+class FbPhoneAuth extends StatefulWidget {
+  final List<String> userBasket;
+  final String phoneNo;
+  final String userName;
+  final String userAddress;
+  final function;
+
+  const FbPhoneAuth(
+      {Key key,
+      @required this.phoneNo,
+      this.userAddress,
+      this.userName,
+      this.function,
+      this.userBasket})
+      : super(key: key);
+  @override
+  _FbPhoneAuthState createState() => _FbPhoneAuthState();
+}
+
+class _FbPhoneAuthState extends State<FbPhoneAuth> {
+  TextEditingController _smsCodeController = TextEditingController();
+
+  final phnoController = TextEditingController();
+  String verificationId;
+  bool isPhoneVerified = false;
+  bool isOrderMade = false;
+  bool isOtpSent = false;
+  bool isError = false;
+  String errorData;
+  int totalPrice;
+  @override
+  void initState() {
+    super.initState();
+   /* totalPrice = Provider.of<CartModel>(primeContext, listen: true).totalPrice;
+        widget.phoneNo, widget.userName, widget.userAddress, widget.userBasket);*/
+    phnoController.text = '+91' + widget.phoneNo;
+  }
+
+  /// Sends the code to the specified phone number.
+  Future<void> _sendCodeToPhoneNumber() async {
+    final PhoneVerificationCompleted verificationCompleted = (user) async {
+      setState(() {
+        isPhoneVerified = true;
+        print(
+            '>>> AUTO SUCCESS >>> Inside _sendCodeToPhoneNumber: signInWithPhoneNumber auto succeeded: $user');
+      });
+      await placeOrder(widget.phoneNo, widget.userName, widget.userAddress,
+          widget.userBasket, context);
+      widget.function();
+    };
+
+    final PhoneVerificationFailed verificationFailed =
+        (AuthException authException) {
+      setState(() {
+        isError = true;
+        errorData = authException.message.toString();
+        print(
+            'Phone number verification failed. Code: ${authException.code}. Message: ${authException.message}');
+      });
+    };
+
+    final PhoneCodeSent codeSent =
+        (String verificationId, [int forceResendingToken]) async {
+      setState(() {
+        isOtpSent = true;
+        this.verificationId = verificationId;
+      });
+      print("code sent to " + widget.phoneNo);
+    };
+
+    final PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
+        (String verificationId) {
+      isError = true;
+      errorData = 'time out';
+      this.verificationId = verificationId;
+      print("time out");
+    };
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phnoController.text,
+        timeout: const Duration(seconds: 5),
+        verificationCompleted: verificationCompleted,
+        verificationFailed: verificationFailed,
+        codeSent: codeSent,
+        codeAutoRetrievalTimeout: codeAutoRetrievalTimeout);
+  }
+
+  Future<void> _signInWithPhoneNumber() async {
+    print('ver id >>' + verificationId + ' code :' + _smsCodeController.text);
+    FirebaseAuth.instance.signOut();
+    final AuthCredential credential = PhoneAuthProvider.getCredential(
+      verificationId: verificationId,
+      smsCode: _smsCodeController.text,
+    );
+    final FirebaseUser user = await FirebaseAuth.instance
+        .signInWithCredential(credential)
+        .catchError((e) {
+      setState(() {
+        errorData = e.toString();
+      });
+    });
+
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
+    setState(() async {
+      isPhoneVerified = true;
+      if (user != null) {
+        print('Successfully signed in, uid: ' + user.uid);
+        await placeOrder(widget.phoneNo, widget.userName, widget.userAddress,
+            widget.userBasket, context);
+      } else {
+        print('Sign in failed');
+        throw Exception('Sign in failed');
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //_sendCodeToPhoneNumber();
+    return AlertDialog(
+      actions: <Widget>[
+        FlatButton(
+          child: isPhoneVerified ? Text('Ok') : Text('Cancel'),
+          onPressed: () async {
+            isPhoneVerified
+                ? Navigator.of(context).popUntil(ModalRoute.withName('/'))
+                : Navigator.of(context).pop();
+            isPhoneVerified
+                ? Navigator.of(context).pushNamed('/orderHistory')
+                : print('object');
+          },
+        )
+      ],
+      title: ListView(
+        shrinkWrap: true,
+        physics: BouncingScrollPhysics(),
+        children: <Widget>[
+          isPhoneVerified
+              ? Text('Order Placed')
+              : Text('Please verify Phone no.'),
+          !isOtpSent
+              ? Column(children: <Widget>[
+                  TextField(
+                    autofocus: true,
+                    // expands: true,
+                    maxLines: null,
+                    controller: phnoController,
+                    decoration: InputDecoration(
+                      labelText: 'Send OTP on Phone no :',
+                    ),
+                    autocorrect: true,
+                    keyboardType: TextInputType.phone,
+                    maxLength: 13,
+                  ),
+                  FlatButton(
+                    color: Colors.green,
+                    textColor: Colors.white,
+                    onPressed: isOtpSent
+                        ? null
+                        : () {
+                            setState(() {
+                              isOtpSent = true;
+                            });
+                            _sendCodeToPhoneNumber();
+                          },
+                    child: isOtpSent ? Text('OTP Sent') : Text('Send OTP'),
+                  ),
+                  Divider(),
+                  Text('VegiGO | T.S.C',
+                      style: TextStyle(color: Colors.grey, fontSize: 15))
+                ])
+              : Container(),
+          isOtpSent
+              ? isPhoneVerified
+                  ? Column(children: <Widget>[
+                      Container(
+                        height: 50,
+                        margin: EdgeInsets.only(bottom: 20),
+                        color: Colors.lightGreen[50],
+                        child: Center(
+                          child: Text('OTP Verified :)'),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Image.network(
+                          'https://dumielauxepices.net/sites/default/files/green-tick-clipart-animation-627696-3105204.gif',
+                          height: 100,
+                          width: 100,
+                        ),
+                      ),
+                      Container(
+                        child: Text('Order Placed'),
+                      ),
+                      Text('VegiGO | T.S.C',
+                          style: TextStyle(color: Colors.grey, fontSize: 15))
+                    ])
+                  : Column(children: <Widget>[
+                      TextField(
+                        autofocus: true,
+                        // expands: true,
+                        maxLines: null,
+                        controller: _smsCodeController,
+                        decoration: InputDecoration(
+                          labelText: 'Enter OTP',
+                        ),
+                        autocorrect: true,
+                        keyboardType: TextInputType.phone,
+                        maxLength: 6,
+                      ),
+                      FlatButton(
+                        color: Colors.green,
+                        textColor: Colors.white,
+                        onPressed: isPhoneVerified
+                            ? null
+                            : () async {
+                                await _signInWithPhoneNumber();
+                              },
+                        child: Text('Verify OTP'),
+                      ),
+                      Divider(),
+                      isError
+                          ? Container()
+                          : FlatButton(
+                              onPressed: () {
+                                setState(() {
+                                  isError = true;
+                                  errorData =
+                                      'Having trouble in OTP verification,\n You can order on whatsapp';
+                                });
+                              },
+                              textColor: Colors.blue,
+                              child: Text(
+                                'Help',
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ),
+                      isError
+                          ? Column(
+                              children: <Widget>[
+                                Text(
+                                  '--- Opps Error occured!\n \n$errorData ',
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 10),
+                                ),
+                                FlatButton(
+                                  color: Colors.orange,
+                                  onPressed: () async {
+                                    String waapString = '';
+                                    widget.userBasket.forEach((f) {
+                                      waapString = waapString + f + '\n';
+                                    });
+                                    DateTime time = DateTime.now();
+                                    int orderNumber =
+                                        time.millisecondsSinceEpoch;
+                                    CollectionReference dbl = Firestore.instance
+                                        .collection('vegigo_whatsapp_orders');
+                                    await dbl
+                                        .document(widget.phoneNo.toString())
+                                        .setData({
+                                      widget.userName +
+                                          '-' +
+                                          orderNumber.toString() +
+                                          ' V3': {
+                                        'orders': widget.userBasket,
+                                        'customerName': widget.userName,
+                                        'orderNumber': orderNumber.toString(),
+                                        'timestamp': time.toString(),
+                                        'totalPrice': totalPrice,
+                                        'error': errorData,
+                                      },
+                                    });
+                                    final SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    final String ouserPhone =
+                                        prefs.getString('userPhone');
+
+                                    await loginUser(widget.userName,
+                                        widget.userAddress, ouserPhone);
+                                    await FlutterLaunch.launchWathsApp(
+                                        phone: '91' +
+                                            versionController['sellerDetails']
+                                                ['phone'],
+                                        message:
+                                            "*error* : $errorData\n--------------\n*Name* : ${widget.userName},\n*Address* : ${widget.userAddress}\n*Total : ₹$totalPrice*\n--------------\n*Basket* : \n$waapString\n ");
+                                  },
+                                  child: Text('order on whatsapp'),
+                                ),
+                                Divider(),
+                              ],
+                            )
+                          : Text('VegiGO | T.S.C',
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 15)),
+                    ])
+              : Container(),
+        ],
+      ),
+    );
+  }
+}
+
+Future<void> placeOrder(String phone, String name, String address,
+    List<String> userBasket, BuildContext context) async {
+  List<CartItem> items =
+      Provider.of<CartModel>(primeContext, listen: true).items;
+  int length = Provider.of<CartModel>(primeContext, listen: true).totalItems;
+  //--------------------------------total price---------------------->
+  int totalPrice =
+      Provider.of<CartModel>(primeContext, listen: true).totalPrice;
+  versionController['onDelLimit']
+      ? (totalPrice) > versionController['deliveryCostLimit']
+          ? totalPrice = totalPrice
+          : totalPrice = totalPrice + versionController['deliveryCharges']
+      : totalPrice = totalPrice + versionController['deliveryCharges'];
+  //-----------------------------------<
+  DateTime time = DateTime.now();
+  int orderNumber = time.millisecondsSinceEpoch;
+  String timestamp = time.toString();
+
+  String status = 'Unread';
+  List<Map> basket = [];
+  items.forEach((item) => basket.add(item.toMap()));
+  print('tp>>>>>>>>>>>>>>>>>' + timestamp);
+
+  DatabaseReference db =
+      FirebaseDatabase.instance.reference().child("vegigo_orders");
+
+  await db.child(orderNumber.toString()).update({
+    'basket': basket,
+    'customerAddress': address,
+    'customerMobile': phone,
+    'customerName': name,
+    'orderNumber': orderNumber.toString() + ' V2',
+    'status': status,
+    'timestamp': timestamp,
+    'totalPrice': totalPrice,
+    'totalItems': length,
+  });
+
+  DatabaseReference dbl =
+      FirebaseDatabase.instance.reference().child("vegigo_orders_live");
+  await dbl
+      .child(phone.toString() + '/' + orderNumber.toString() + ' V2')
+      .update({
+    'orders': userBasket,
+    'customerName': name,
+    'orderNumber': orderNumber.toString(),
+    'status': status,
+    'timestamp': timestamp,
+    'totalPrice': totalPrice,
+    'totalItems': length,
+  });
+  await loginUser(name, address, phone);
+}
+
+Future<Null> loginUser(String name, String address, String phone) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setString('userName', name);
+  prefs.setString('userAddress', address);
+  prefs.setString('userPhone', phone);
+}

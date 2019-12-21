@@ -1,9 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:road_repair/fitness_app/fitness_app_home_screen.dart';
+import 'package:road_repair/homePage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'userSignIn/authenticate.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  return runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -11,54 +17,62 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: '/init',
+      routes: {
+        '/init': (context) => RefreshPage(),
+        '/sign': (context) => Authenticate(),
+        '/home': (context) => FitnessAppHomeScreen(),
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
+class RefreshPage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _RefreshPageState createState() => _RefreshPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _RefreshPageState extends State<RefreshPage> {
+  String email;
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    _setRoute();
+    super.initState();
+  }
+
+  void _setRoute() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
-      _counter++;
+      email = sharedPreferences.getString("email");
     });
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    print('user :' + user.toString());
+    if (user != null) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    } else {
+      Navigator.of(context).pushReplacementNamed('/sign');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: CircularProgressIndicator(),
       ),
     );
+  }
+}
+
+class HexColor extends Color {
+  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll('#', '');
+    if (hexColor.length == 6) {
+      hexColor = 'FF' + hexColor;
+    }
+    return int.parse(hexColor, radix: 16);
   }
 }
