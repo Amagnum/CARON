@@ -55,19 +55,18 @@
     
                 var docData = {
                         arr: [
-                            { lat: latitude, lng: longitude, isCompleted: true },
-                            { lat: 29.870234, lng: 77.892705, isCompleted: false },
-                            { lat: 29.870131, lng: 77.892725, isCompleted: true },
-                            { lat: 29.870124, lng: 77.892745, isCompleted: false },
-                            { lat: 29.870128, lng: 77.892775, isCompleted: true },
-                            { lat: 29.870119, lng: 77.892715, isCompleted: true },
+                            { lat: 29.856482, lng: 77.888209, isCompleted: false },
+                            { lat: 29.869359, lng: 77.889754, isCompleted: false },
+                            { lat: 29.874327, lng: 77.894818, isCompleted: true },
+                            { lat: 29.881168, lng: 77.903705, isCompleted: true },
+                            { lat: 29.881103, lng: 77.908823, isCompleted: false },
+                            { lat: 29.879373, lng: 77.914348, isCompleted: true },
                         ]
                 };
 
-                await db.collection("routes").doc("one").set(docData)
+                await db.collection("routes").doc("three").set(docData)
 
-                await db.collection("routes").get().then(querySnapshot => {
-                    querySnapshot.forEach(doc => {
+                await db.collection("routes").doc(window.location.search.substr(6)).get().then(doc => {
                         let data = doc.data().arr
                         data.forEach(async (d, i) => {
                             if(i === data.length - 1) return;
@@ -76,7 +75,6 @@
                                 {lat: data[i+1].lat, lng: data[i+1].lng}
                             ]
                             let strokeColor = data[i+1].isCompleted ? '#00FF00' : '#FF0000'
-                            console.log(path, strokeColor)
                             var flightPath = new google.maps.Polyline({
                                 path,
                                 geodesic: true,
@@ -85,7 +83,6 @@
                             });
                             flightPath.setMap(map);
                         })
-                    })
 
                 })
 
