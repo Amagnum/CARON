@@ -25,3 +25,10 @@ Everyone can now make a significant contribution to the society and our country 
 - Toolkit: Flutter (Dart)
 - Backend Server: Flask (Python)
 - Object Detection: YOLOv2
+
+## Team
+---
+- Pranshu Maheshwari
+- Adarsh Baghel
+- Akshay Prakash
+- Jatin Omprakash Janjir
